@@ -1,0 +1,25 @@
+{
+    "name": "node_ffos_cli",
+    "version": "0.0.1",
+    "description": "Firefox OS command line commander",
+    "keywords": [
+        "firefox os",
+        "firefox"
+    ],
+    "author": {
+        "name": "Francisco Jordano",
+        "email": "francisco@jordano.es",
+        "web": "http://github.com/arcturus",
+        "twitter": "mepartoconmigo"
+    },
+    "license": {
+        "type": "Apache 2.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "http://github.com/arcturus/node_ffos_cli.git"
+    },
+    "dependencies": {
+        "adb": "git://github.com/arcturus/adb.js.git#master"
+    }
+}

@@ -20,6 +20,6 @@
         "url": "http://github.com/arcturus/node_ffos_cli.git"
     },
     "dependencies": {
-        "adb": "git://github.com/arcturus/adb.js.git#master"
+        "adb.js": "git://github.com/arcturus/adb.js.git#master"
     }
 }

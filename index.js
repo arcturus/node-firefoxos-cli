@@ -33,7 +33,9 @@ var FFOS_Cli = function FFOS_Cli() {
       try {
         device.takeSnapshot(function onSnapshot(frame) {
           frame.writeImageFile(fileName);
-          callback(null);
+          if (callback) {
+            callback(null);
+          }
         });
       } catch (e) {
         callback(e);
@@ -58,7 +60,8 @@ var FFOS_Cli = function FFOS_Cli() {
       //Build the remote url with the appId
       var remoteFile = '/data/local/tmp/b2g/' + appId + '/application.zip';
       pushFile(localZip, remoteFile, function onPushed(err, success) {
-        if (err) {
+        // Know bug in adb library it returns error 15 despite of uploading the file
+        if (err && err != 15) {
           callback(err);
           return;
         }

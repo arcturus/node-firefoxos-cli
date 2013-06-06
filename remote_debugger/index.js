@@ -17,8 +17,14 @@ var RemoteDebugger = function RemoteDebugger() {
     client.on('data', (function onData(data) {
       // Get the json object out of the protocol data
       data = data.toString();
-      var currentObject = JSON.parse(
+
+      var currentObject;
+      try {
+        currentObject = JSON.parse(
         data.substr(data.indexOf(':') + 1));
+      } catch (e) {
+        onError(e + ' ::: ' + data);
+      }
 
       console.log(JSON.stringify(currentObject));
 
@@ -51,7 +57,9 @@ var RemoteDebugger = function RemoteDebugger() {
         onError(currentObject);
       }
     }).bind(client));
-    client.on('error', onError);
+    client.on('error', function(err) {
+      onError();}
+      );
 
     return client;
   };

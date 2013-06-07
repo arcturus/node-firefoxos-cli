@@ -20,9 +20,12 @@
     },
     "repository": {
         "type": "git",
-        "url": "http://github.com/arcturus/node_ffos_cli.git"
+        "url": "http://github.com/arcturus/node-firefoxos-cli.git"
     },
     "dependencies": {
         "adb.js": "git://github.com/arcturus/adb.js.git#master"
+    },
+    "engines": {
+        "node": ">=0.10.10"
     }
 }

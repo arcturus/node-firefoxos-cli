@@ -115,12 +115,29 @@ var FFOS_Cli = function FFOS_Cli() {
     });
   };
 
+  // Resets the B2G process as the name says
+  var resetB2G = function resetB2G(callback) {
+    adb.traceDevice(function onDevices(devices) {
+      for (var i = 0; i < devices.length; i++) {
+        var device = devices[i];
+        device.shellCmd('stop', ['b2g'], function onCmd(data) {
+            device.shellCmd('start', ['b2g'], function onCmd(data) {
+              if (callback) {
+                callback();
+              }
+            });
+        });
+      }
+    });
+  };
+
   return {
     'config': config,
     'logcat': logcat,
     'screenshot': screenshot,
     'installHostedApp': installHostedApp,
-    'installPackagedApp': installPackagedApp
+    'installPackagedApp': installPackagedApp,
+    'resetB2G': resetB2G
   };
 
 }();

@@ -26,7 +26,7 @@ var RemoteDebugger = function RemoteDebugger() {
         onError(e + ' ::: ' + data);
       }
 
-      console.log(JSON.stringify(currentObject));
+      //console.log(JSON.stringify(currentObject));
 
       if (!this.tabList && 'tabs' in currentObject) {
         // Wait till one data object contains the

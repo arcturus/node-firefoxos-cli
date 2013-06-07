@@ -59,6 +59,7 @@ var FFOS_Cli = function FFOS_Cli() {
     adb.forward(localPort, remotePort, function onForward() {
       //Build the remote url with the appId
       var remoteFile = '/data/local/tmp/b2g/' + appId + '/application.zip';
+      console.log('Doing push for file ' + remoteFile);
       pushFile(localZip, remoteFile, function onPushed(err, success) {
         // Know bug in adb library it returns error 15 despite of uploading the file
         if (err && err != 15) {

@@ -49,7 +49,7 @@ var FFOS_Cli = function FFOS_Cli() {
     2.- Upload the selected zip file to the app id
     3.- Use the remote client to tell the system to install the app
   */
-  var installApp = function installApp (appId, localZip, appType, callback) {
+  var installApp = function installApp(appId, localZip, appType, callback) {
     var localPort = remotePort = 'tcp:6000';
     if (config && config.localPort && config.remotePort) {
       localPort = config.localPort;
@@ -71,6 +71,19 @@ var FFOS_Cli = function FFOS_Cli() {
       });
     });
 
+  };
+
+  /*
+    Shortcut of the previous function to install packaged apps
+  */
+  var installHostedApp = function installHostedApp(appId,
+    manifestFile, callback) {
+    installApp(appId, manifestFile, '1', callback);
+  };
+
+  var installPackagedApp = function installPackagedApp(appId,
+    localZip, callback) {
+    installApp(appId, localZip, '2', callback);
   };
 
   // Uses the remote protocol to tell the system to install an app
@@ -106,7 +119,8 @@ var FFOS_Cli = function FFOS_Cli() {
     'config': config,
     'logcat': logcat,
     'screenshot': screenshot,
-    'installApp': installApp
+    'installHostedApp': installHostedApp,
+    'installPackagedApp': installPackagedApp
   };
 
 }();

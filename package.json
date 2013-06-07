@@ -1,13 +1,13 @@
 {
     "name": "node-firefoxos-cli",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Firefox OS command line commander",
     "keywords": [
         "firefox os",
         "firefox",
-	"command line",
-	"remote",
-	"debugger"
+    	"command line",
+    	"remote",
+    	"debugger"
     ],
     "author": {
         "name": "Francisco Jordano",

@@ -7,6 +7,8 @@ node library + command line tool to perform basic web app development stuff
 
 - Installing app
 - Taking screenshots
+- Logcat
+- Reset b2g process
 
 ## Next to come
 
@@ -18,4 +20,8 @@ and
 digitalrald for his work on [make-fxos-install](https://github.com/digitarald/make-fxos-install)
 
 #### Don't forget
-Enable remote debugging in the device :P
+Enable remote debugging in the device and of course run
+
+```shell
+npm install
+```

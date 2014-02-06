@@ -65,3 +65,7 @@ ffos_cli.logcat(); //Output logcat from device continously
 ```
 
 
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/arcturus/node-firefoxos-cli/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+

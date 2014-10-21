@@ -50,7 +50,8 @@ var FFOS_Cli = function FFOS_Cli() {
     3.- Use the remote client to tell the system to install the app
   */
   var installApp = function installApp(appId, localZip, appType, callback) {
-    var localPort = remotePort = 'tcp:6000';
+    var localPort = 'tcp:6000';
+    var remotePort = 'localfilesystem:/data/local/debugger-socket';
     if (config && config.localPort && config.remotePort) {
       localPort = config.localPort;
       remotePort = config.remotePort;
@@ -67,7 +68,7 @@ var FFOS_Cli = function FFOS_Cli() {
           return;
         }
 
-        installRemote(remotePort, appId, appType, callback);
+        installRemote(localPort, appId, appType, callback);
       });
     });
 

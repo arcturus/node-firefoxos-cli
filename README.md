@@ -9,11 +9,12 @@ node library + command line tool to perform basic web app development stuff
 - Taking screenshots
 - Logcat
 - Reset b2g process
+- Close App
+- Launch App
 
 ## Next to come
 
 - Uninstall
-- Launch
 
 Based on @fabricedesr amazing work on [b2gremote](https://github.com/fabricedesre/b2gremote)
 and
@@ -43,6 +44,38 @@ ffos_cli.installPackagedApp('boilerplate', './application.zip', function onInsta
   }
   process.exit(0);
 });
+```
+
+#### Stopping an app
+
+```javascript
+var ffos_cli = require('./index.js');
+
+ffos_cli.closeApp('boilerplate', function onClose(err, done) {
+  if (err) {
+    console.error('Error closing app: ' + err);
+  } else {
+    console.log('Application closed');
+  }
+  process.exit(0);
+});
+
+```
+
+#### Launching an app
+
+```javascript
+var ffos_cli = require('./index.js');
+
+ffos_cli.launchApp('boilerplate', function onLaunch(err, done) {
+  if (err) {
+    console.error('Error launching app: ' + err);
+  } else {
+    console.log('Application launched');
+  }
+  process.exit(0);
+});
+
 ```
 
 ### Reset B2G process

@@ -80,10 +80,36 @@ var RemoteDebugger = function RemoteDebugger() {
       callback(e);
     });
   };
+  
+  var closeApp = function closeApp(name, callback) {
+    var message = {
+      type: 'close',
+      manifestURL: "app://" + name + "/manifest.webapp"
+    };
+    var op = RemoteOperation('webappsActor', message, function onResponse(data) {
+      callback(null, data);
+    }, function onError(e) {
+      callback(e);
+    });
+  };
+
+  var launchApp = function launchApp(name, callback) {
+    var message = {
+      type: 'launch',
+      manifestURL: "app://" + name + "/manifest.webapp"
+    };
+    var op = RemoteOperation('webappsActor', message, function onResponse(data) {
+      callback(null, data);
+    }, function onError(e) {
+      callback(e);
+    });
+  };
 
   return {
     'init': init,
-    'installApp': installApp
+    'installApp': installApp,
+    'closeApp': closeApp,
+    'launchApp': launchApp
   };
 }();
 

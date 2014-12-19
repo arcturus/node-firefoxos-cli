@@ -1,11 +1,7 @@
 var ffos_cli = require('../../index.js');
 
-ffos_cli.installPackagedApp('boilerplate', './application.zip', function onInstall(err, done) {
-  if (err) {
-    console.error('Error updating app: ' + err);
-  } else {
-    console.log('Successfuly installed');
-  }
-  process.exit(0);
-});
-
+ffos_cli.installPackagedApp('boilerplate', './application.zip').then(function() {
+  return ffos_cli.launchApp('boilerplate');
+}, function(err) {
+  console.error('ERROR :: ', err);
+}).then(process.exit, process.exit);

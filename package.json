@@ -1,31 +1,32 @@
 {
-    "name": "node-firefoxos-cli",
-    "version": "0.0.2",
-    "description": "Firefox OS command line commander",
-    "keywords": [
-        "firefox os",
-        "firefox",
-    	"command line",
-    	"remote",
-    	"debugger"
-    ],
-    "author": {
-        "name": "Francisco Jordano",
-        "email": "francisco@jordano.es",
-        "web": "http://github.com/arcturus",
-        "twitter": "mepartoconmigo"
-    },
-    "license": {
-        "type": "Apache 2.0"
-    },
-    "repository": {
-        "type": "git",
-        "url": "http://github.com/arcturus/node-firefoxos-cli.git"
-    },
-    "dependencies": {
-        "adb.js": "git://github.com/arcturus/adb.js.git#master"
-    },
-    "engines": {
-        "node": ">=0.10.10"
-    }
+  "name": "node-firefoxos-cli",
+  "version": "0.1.0",
+  "description": "Firefox OS command line commander",
+  "keywords": [
+    "firefox os",
+    "firefox",
+    "command line",
+    "remote",
+    "debugger"
+  ],
+  "author": {
+    "name": "Francisco Jordano",
+    "email": "francisco@jordano.es",
+    "web": "http://github.com/arcturus",
+    "twitter": "mepartoconmigo"
+  },
+  "license": {
+    "type": "Apache 2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/arcturus/node-firefoxos-cli.git"
+  },
+  "dependencies": {
+    "adb.js": "git://github.com/arcturus/adb.js.git#master",
+    "promise": "^6.0.1"
+  },
+  "engines": {
+    "node": ">=0.10.10"
+  }
 }

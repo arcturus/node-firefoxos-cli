@@ -1,6 +1,6 @@
 # Firefox OS Node Command Line Develoment Tools
 
-node library + command line tool to perform basic web app development stuff
+node library + command line tool to perform basic web app development on Firefox OS phones.
 
 
 ## Currenty supporting
@@ -21,7 +21,7 @@ and
 digitalrald for his work on [make-fxos-install](https://github.com/digitarald/make-fxos-install)
 
 ## Don't forget
-Enable remote debugging in the device and of course run
+Enable remote debugging in the device
 
 ```shell
 npm install
@@ -34,56 +34,41 @@ In the `examples` folder you could find some code that shows the use of this lib
 #### Installing
 
 ```javascript
-var ffos_cli = require('./index.js');
+var ffos_cli = require('node-firefoxos-cli');
 
-ffos_cli.installPackagedApp('boilerplate', './application.zip', function onInstall(err, done) {
-  if (err) {
-    console.error('Error updating app: ' + err);
-  } else {
+ffos_cli.installPackagedApp('boilerplate', './application.zip').then(
+  function() {
     console.log('Successfuly installed');
+  },
+  function(err) {
+    console.error('Error updating app: ' + err);
   }
-  process.exit(0);
-});
-```
-
-#### Stopping an app
-
-```javascript
-var ffos_cli = require('./index.js');
-
-ffos_cli.closeApp('boilerplate', function onClose(err, done) {
-  if (err) {
-    console.error('Error closing app: ' + err);
-  } else {
-    console.log('Application closed');
-  }
-  process.exit(0);
-});
-
+).then(process.exit, process.exit);
 ```
 
 #### Launching an app
 
 ```javascript
-var ffos_cli = require('./index.js');
+var ffos_cli = require('node-firefoxos-cli');
 
-ffos_cli.launchApp('boilerplate', function onLaunch(err, done) {
-  if (err) {
-    console.error('Error launching app: ' + err);
-  } else {
-    console.log('Application launched');
-  }
-  process.exit(0);
-});
+ffos_cli.launchApp('boilerplate').then(process.exit);
 
+```
+
+#### Stopping an app
+
+```javascript
+var ffos_cli = require('node-firefoxos-cli');
+
+ffos_cli.closeApp('boilerplate').then(process.exit);
 ```
 
 ### Reset B2G process
 
 ```javascript
-var ffos_cli = require('./index.js');
+var ffos_cli = require('node-firefoxos-cli');
 
-ffos_cli.resetB2G(function onReset() {
+ffos_cli.resetB2G().then(function onReset() {
   console.log('B2G process reseted');
   process.exit(0);
 });
@@ -92,13 +77,8 @@ ffos_cli.resetB2G(function onReset() {
 ### Logcat
 
 ```javascript
-var ffos_cli = require('./index.js');
+var ffos_cli = require('node-firefoxos-cli');
 
-ffos_cli.logcat(); //Output logcat from device continously
+//Output logcat from device continously
+ffos_cli.logcat();
 ```
-
-
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/arcturus/node-firefoxos-cli/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-

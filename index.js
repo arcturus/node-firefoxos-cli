@@ -1,14 +1,43 @@
-var remote = require('./remote_debugger'),
-    ADB = require('adb').DebugBridge;
+var remote = require('./remote_debugger')
+    , ADB = require('adb').DebugBridge
+    , Promise = require('promise');
 
 var FFOS_Cli = function FFOS_Cli() {
 
   var config;
   var adb = new ADB();
+  var remoteInitialized = false;
+  var portForwarded = false;
+  var localPort = 'tcp:6000';
+  var remotePort = 'localfilesystem:/data/local/debugger-socket';
 
   var configure = function configure(json) {
     config = json;
+
+    if (config) {
+      localPort = config.localPort || localPort;
+      remotePort = config.remotePort || remotePort;
+    }
   };
+
+  function ensureRemoteInit() {
+    if (!remoteInitialized) {
+      remote.init(localPort.split(':')[1]);
+      remoteInitialized = true;
+    }
+  }
+
+  function ensurePortForwarded() {
+    if (!portForwarded) {
+      portForwarded = true;
+
+      return new Promise(function(resolve) {
+        adb.forward(localPort, remotePort, resolve);
+      });
+    } else {
+      return Promise.resolve();
+    }
+  }
 
   // Start displaying the logcat for the first device we find
   var logcat = function logcat() {
@@ -24,22 +53,22 @@ var FFOS_Cli = function FFOS_Cli() {
   // and a callback to know when we finished.
   // The callback expected 1 parameter, in case an error
   // happened
-  var screenshot = function screenshot(fileName, callback) {
-    adb.traceDevice(function onDevices(devices) {
-      if (!devices || devices.length == 0) {
-        callback('No devices');
-      }
-      var device = devices[0];
-      try {
-        device.takeSnapshot(function onSnapshot(frame) {
-          frame.writeImageFile(fileName);
-          if (callback) {
-            callback(null);
-          }
-        });
-      } catch (e) {
-        callback(e);
-      }
+  var screenshot = function screenshot(fileName) {
+    return new Promise(function(resolve, reject) {
+      adb.traceDevice(function onDevices(devices) {
+        if (!devices || devices.length == 0) {
+          reject('No devices');
+        }
+        var device = devices[0];
+        try {
+          device.takeSnapshot(function onSnapshot(frame) {
+            frame.writeImageFile(fileName);
+            resolve();
+          });
+        } catch (e) {
+          reject(e);
+        }
+      });
     });
   };
 
@@ -49,48 +78,31 @@ var FFOS_Cli = function FFOS_Cli() {
     2.- Upload the selected zip file to the app id
     3.- Use the remote client to tell the system to install the app
   */
-  var installApp = function installApp(appId, localZip, appType, callback) {
-    var localPort = 'tcp:6000';
-    var remotePort = 'localfilesystem:/data/local/debugger-socket';
-    if (config && config.localPort && config.remotePort) {
-      localPort = config.localPort;
-      remotePort = config.remotePort;
-    }
-
-    adb.forward(localPort, remotePort, function onForward() {
+  var installApp = function installApp(appId, localZip, appType) {
+    return ensurePortForwarded().then(function onForward() {
       //Build the remote url with the appId
       var remoteFile = '/data/local/tmp/b2g/' + appId + '/application.zip';
-      console.log('Doing push for file ' + remoteFile);
-      pushFile(localZip, remoteFile, function onPushed(err, success) {
+      return pushFile(localZip, remoteFile).then(function onPushed(err, success) {
         // Know bug in adb library it returns error 15 despite of uploading the file
         if (err && err != 15) {
-          callback(err);
-          return;
+          return Promsie.reject(err);
         }
 
-        installRemote(localPort, appId, appType, callback);
+        return installRemote(appId, appType);
       });
     });
 
   };
 
-  
   /*
     For closing an app just follow the steps:
     1.- Forward the remote debugger port (use config if present)
     2.- Use the remote client to tell the system to stop the app
   */
-  var closeApp = function closeApp(appId, callback) {
-    var localPort = 'tcp:6000';
-    var remotePort = 'localfilesystem:/data/local/debugger-socket';
-    if (config && config.localPort && config.remotePort) {
-      localPort = config.localPort;
-      remotePort = config.remotePort;
-    }
-
-    adb.forward(localPort, remotePort, function onForward() {
-      closeRemote(localPort, appId, callback);
-    });
+  var closeApp = function closeApp(appId) {
+    return ensurePortForwarded().then(function() {
+      return closeRemote(appId);
+    })
   };
 
   /*
@@ -98,98 +110,93 @@ var FFOS_Cli = function FFOS_Cli() {
     1.- Forward the remote debugger port (use config if present)
     2.- Use the remote client to tell the system to launch the app
   */
-  var launchApp = function launchApp(appId, callback) {
-    var localPort = 'tcp:6000';
-    var remotePort = 'localfilesystem:/data/local/debugger-socket';
-    if (config && config.localPort && config.remotePort) {
-      localPort = config.localPort;
-      remotePort = config.remotePort;
-    }
-
-    adb.forward(localPort, remotePort, function onForward() {
-      launchRemote(localPort, appId, callback);
+  var launchApp = function launchApp(appId) {
+    return ensurePortForwarded().then(function() {
+      return launchRemote(appId);
     });
   };
 
   /*
     Shortcut of the previous function to install packaged apps
   */
-  var installHostedApp = function installHostedApp(appId,
-    manifestFile, callback) {
-    installApp(appId, manifestFile, '1', callback);
+  var installHostedApp = function installHostedApp(appId, manifestFile) {
+    return installApp(appId, manifestFile, '1');
   };
 
-  var installPackagedApp = function installPackagedApp(appId,
-    localZip, callback) {
-    installApp(appId, localZip, '2', callback);
+  var installPackagedApp = function installPackagedApp(appId, localZip) {
+    return installApp(appId, localZip, '2');
   };
 
   // Uses the remote protocol to tell the system to install an app
   // previously uploaded
-  var installRemote = function installRemote(remotePort, appId, appType, cb) {
-    remote.init(remotePort.split(':')[1]);
-    remote.installApp(appId, appType, function onInstall(err, data) {
-      if (err) {
-        cb(err);
-        return;
-      }
-      cb(null, data);
+  var installRemote = function installRemote(appId, appType) {
+    ensureRemoteInit();
+    return new Promise(function (resolve, reject) {
+      remote.installApp(appId, appType, function onInstall(err, data) {
+        if (err) {
+          return reject(err);
+        }
+        resolve(data);
+      });
     });
   };
 
   // Uses the remote protocol to tell the system to stop an app
-  var closeRemote = function closeRemote(remotePort, appId, cb) {
-    remote.init(remotePort.split(':')[1]);
-    remote.closeApp(appId, function onClose(err, data) {
-      if (err) {
-        cb(err);
-        return;
-      }
-      cb(null, data);
+  var closeRemote = function closeRemote(appId) {
+    ensureRemoteInit();
+    return new Promise(function(resolve, reject) {
+      remote.closeApp(appId, function onClose(err, data) {
+        if (err) {
+          return reject(err);
+        }
+        resolve(data);
+      });
     });
   };
 
   // Uses the remote protocol to tell the system to launch an app
-  var launchRemote = function launchRemote(remotePort, appId, cb) {
-    remote.init(remotePort.split(':')[1]);
-    remote.launchApp(appId, function onLaunch(err, data) {
-      if (err) {
-        cb(err);
-        return;
-      }
-      cb(null, data);
+  var launchRemote = function launchRemote(appId) {
+    ensureRemoteInit();
+    return new Promise(function(resolve, reject) {
+      remote.launchApp(appId, function onLaunch(err, data) {
+        if (err) {
+          return reject(err);
+        }
+        resolve(data);
+      });
     });
   };
 
   // Push a local file to a remote location on the phone
-  var pushFile = function pushFile(local, remote, callback) {
-    adb.traceDevice(function onDevices(devices) {
-      // Work with the first device we found, if any
-      if (!devices || devices.length == 0) {
-        callback('No devices found');
-        return;
-      }
-      var device = devices[0];
+  var pushFile = function pushFile(local, remote) {
+    return new Promise(function(resolve, reject) {
+      adb.traceDevice(function onDevices(devices) {
+        // Work with the first device we found, if any
+        if (!devices || devices.length == 0) {
+          return reject('No devices found');
+        }
+        var device = devices[0];
 
-      device.getSyncService(function onSyncService(sync) {
-        sync.pushFile(local, remote, callback);
+        device.getSyncService(function onSyncService(sync) {
+          sync.pushFile(local, remote, resolve);
+        });
       });
     });
   };
 
   // Resets the B2G process as the name says
-  var resetB2G = function resetB2G(callback) {
-    adb.traceDevice(function onDevices(devices) {
-      for (var i = 0; i < devices.length; i++) {
-        var device = devices[i];
-        device.shellCmd('stop', ['b2g'], function onCmd(data) {
+  var resetB2G = function resetB2G() {
+    return new Promise(function(resolve) {
+      adb.traceDevice(function onDevices(devices) {
+        for (var i = 0; i < devices.length; i++) {
+          var device = devices[i];
+          device.shellCmd('stop', ['b2g'], function onCmd(data) {
             device.shellCmd('start', ['b2g'], function onCmd(data) {
-              if (callback) {
-                callback();
-              }
+              resolve();
             });
-        });
-      }
+          });
+        }
+      });
     });
   };
 

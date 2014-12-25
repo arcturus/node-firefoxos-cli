@@ -85,13 +85,11 @@ var FFOS_Cli = function FFOS_Cli() {
       return pushFile(localZip, remoteFile).then(function onPushed(err, success) {
         // Know bug in adb library it returns error 15 despite of uploading the file
         if (err && err != 15) {
-          return Promsie.reject(err);
+          return Promise.reject(err);
         }
-
         return installRemote(appId, appType);
       });
     });
-
   };
 
   /*
@@ -100,9 +98,7 @@ var FFOS_Cli = function FFOS_Cli() {
     2.- Use the remote client to tell the system to stop the app
   */
   var closeApp = function closeApp(appId) {
-    return ensurePortForwarded().then(function() {
-      return closeRemote(appId);
-    })
+    return appCommandRemote("close", appId, null);
   };
 
   /*
@@ -111,9 +107,16 @@ var FFOS_Cli = function FFOS_Cli() {
     2.- Use the remote client to tell the system to launch the app
   */
   var launchApp = function launchApp(appId) {
-    return ensurePortForwarded().then(function() {
-      return launchRemote(appId);
-    });
+    return appCommandRemote("launch", appId, null);
+  };
+
+  /*
+    For launching any generic command just follow the steps:
+    1.- Forward the remote debugger port (use config if present)
+    2.- Use the remote client to tell the system to execute the command
+  */
+  var appCommand = function appCommand(command, appId, actor) {
+    return appCommandRemote(command, appId, actor);
   };
 
   /*
@@ -141,24 +144,10 @@ var FFOS_Cli = function FFOS_Cli() {
     });
   };
 
-  // Uses the remote protocol to tell the system to stop an app
-  var closeRemote = function closeRemote(appId) {
+  var appCommandRemote = function appCommandRemote(command, appId, actor) {
     ensureRemoteInit();
     return new Promise(function(resolve, reject) {
-      remote.closeApp(appId, function onClose(err, data) {
-        if (err) {
-          return reject(err);
-        }
-        resolve(data);
-      });
-    });
-  };
-
-  // Uses the remote protocol to tell the system to launch an app
-  var launchRemote = function launchRemote(appId) {
-    ensureRemoteInit();
-    return new Promise(function(resolve, reject) {
-      remote.launchApp(appId, function onLaunch(err, data) {
+      remote.appCommand(command, appId, actor, function onLaunch(err, data) {
         if (err) {
           return reject(err);
         }
@@ -208,6 +197,7 @@ var FFOS_Cli = function FFOS_Cli() {
     'installPackagedApp': installPackagedApp,
     'closeApp': closeApp,
     'launchApp': launchApp,
+    'appCommand': appCommand,
     'resetB2G': resetB2G
   };
 

@@ -81,35 +81,23 @@ var RemoteDebugger = function RemoteDebugger() {
     });
   };
   
-  var closeApp = function closeApp(name, callback) {
+  var appCommand = function appCommand(command, name, actor, callback) {
     var message = {
-      type: 'close',
+      type: command,
       manifestURL: "app://" + name + "/manifest.webapp"
     };
-    var op = RemoteOperation('webappsActor', message, function onResponse(data) {
+    var actorName = actor || "webappsActor";
+    var op = RemoteOperation(actorName, message, function onResponse(data) {
       callback(null, data);
     }, function onError(e) {
       callback(e);
     });
-  };
-
-  var launchApp = function launchApp(name, callback) {
-    var message = {
-      type: 'launch',
-      manifestURL: "app://" + name + "/manifest.webapp"
-    };
-    var op = RemoteOperation('webappsActor', message, function onResponse(data) {
-      callback(null, data);
-    }, function onError(e) {
-      callback(e);
-    });
-  };
+  }
 
   return {
     'init': init,
     'installApp': installApp,
-    'closeApp': closeApp,
-    'launchApp': launchApp
+    'appCommand': appCommand
   };
 }();
 

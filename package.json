@@ -15,9 +15,7 @@
     "web": "http://github.com/arcturus",
     "twitter": "mepartoconmigo"
   },
-  "license": {
-    "type": "Apache 2.0"
-  },
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "http://github.com/arcturus/node-firefoxos-cli.git"
